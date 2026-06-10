@@ -13,19 +13,20 @@ __device__ __forceinline__ int32_t calc_sft(double amax, double vecnrm) {
     if (amax == 0.0) return 0;
     const int32_t exponent = common::Tilogb<double>(vecnrm);
     const float vecnrmf    = __double2float_ru(scalbn(vecnrm, -exponent));
-    const float log2vnrm   = __fadd_ru(__fmul_ru(h4u_ru, __log2f(vecnrmf)), exponent);
+    const float log2vnrm   = __fmul_ru(h4u_ru, __fadd_ru(__log2f(vecnrmf), exponent));
     constexpr float log2P  = common::table::log2P<BACKEND, NUM_MODULI>;
-    const float exp1       = __fsub_rd(__fsub_rd(log2P, 2.0f), fmaxf(1.0f, log2vnrm));
+    const float exp1       = __fsub_rd(__fsub_rd(log2P, 1.0f), fmaxf(1.0f, log2vnrm));
     return __float2int_rd(exp1) - common::Tilogb<double>(amax);
 }
 
 template <Backend BACKEND, unsigned NUM_MODULI>
 __device__ __forceinline__ int32_t calc_sft(float amax, float vecnrm) {
     if (amax == 0.0f) return 0;
-    const float log2vsum  = __log2f(vecnrm);
-    const float log2vnrm  = __fmul_ru(h4u_ru, log2vsum);
+    const int32_t exponent = common::Tilogb<float>(vecnrm);
+    const float vecnrmf    = scalbn(vecnrm, -exponent);;
+    const float log2vnrm  = __fmul_ru(h4u_ru, __fadd_ru(__log2f(vecnrmf), exponent));
     constexpr float log2P = common::table::log2P<BACKEND, NUM_MODULI>;
-    const float exp1      = __fsub_rd(__fsub_rd(log2P, 2.0f), fmaxf(1.0f, log2vnrm));
+    const float exp1      = __fsub_rd(__fsub_rd(log2P, 1.0f), fmaxf(1.0f, log2vnrm));
     return __float2int_rd(exp1) - common::Tilogb<float>(amax);
 }
 
